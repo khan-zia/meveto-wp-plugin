@@ -1,0 +1,22 @@
+.meveto-login-widget {
+    padding: 0 0 15px 0;
+}
+
+.meveto-login-widget a.meveto-button {
+    display: inline-block;
+    width: 100%;
+    background-color: #0079BB;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    -webkit-transition: background-color 500ms linear;
+    -ms-transition: background-color 500ms linear;
+    transition: background-color 500ms linear;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.meveto-login-widget a.meveto-button:hover {
+    background-color: #00649B;
+}
