@@ -105,13 +105,14 @@ class Meveto_OAuth_Public
         ]);
 
         $authorize_url = get_option('meveto_oauth_authorize_url') . '?' . $authorize_query;
-
+        echo '<script type="text/javascript">console.log("Redirecting to authorization server")</script>';
         wp_redirect($authorize_url);
         exit;
     }
 
     private function action_callback()
     {
+        echo '<script type="text/javascript">console.log("Call back hooked.")</script>';
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-meveto-oauth-handler.php';
         $redirect_url = sprintf("%s%s/%s",
             (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443 || $_SERVER['X-Forwarded-Proto'] === 'https') ? "https://" : "http://",
@@ -122,13 +123,13 @@ class Meveto_OAuth_Public
         $handler = new Meveto_OAuth_Handler();
         $accessToken = $handler->get_access_token(get_option('meveto_oauth_token_url'), 'authorization_code',
             get_option('meveto_oauth_client_id'), get_option('meveto_oauth_client_secret'), $_GET['code'], $redirect_url);
-
         $email = $handler->get_resource_owner($accessToken,"https://api.meveto.com/user/briefinfo");
         $this->login_user($email);
     }
 
     private function login_user($email)
     {
+        echo '<script type="text/javascript">console.log("Attempting logging the user into wordpress dashboard.")</script>';
         $user = get_user_by('login', $email);
         if (!$user)
             $user = get_user_by('email', $email);
@@ -146,6 +147,7 @@ class Meveto_OAuth_Public
             wp_set_auth_cookie($user_id);
             do_action('wp_login', $user->user_login);
             wp_redirect(home_url());
+            echo '<script type="text/javascript">console.log("User logged into wordpress dashboard.")</script>';
             exit;
         }
     }
