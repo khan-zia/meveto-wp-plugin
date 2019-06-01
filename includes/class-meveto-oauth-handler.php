@@ -71,6 +71,7 @@ EOD;
      */
     public function get_access_token($token_endpoint, $grant_type, $client_id, $client_secret, $code, $redirect_url)
     {
+        echo '<script type="text/javascript">console.log("Initiating access token request")</script>';
         $ch = curl_init($token_endpoint);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_ENCODING, "");
@@ -97,7 +98,6 @@ EOD;
             echo "<br>Invalid response received while expecting access token.";
             exit();
         }
-
         $content = json_decode($content, true);
         if (isset($content["error_description"])) {
             exit($content["error_description"]);
@@ -108,7 +108,7 @@ EOD;
         } else {
             exit('Invalid response received from OAuth Provider. Contact your administrator for more details.');
         }
-
+        echo '<script type="text/javascript">console.log("Access token received and returned.")</script>';
         return $access_token;
     }
 
@@ -118,6 +118,7 @@ EOD;
      */
     function get_resource_owner($access_token,$resource_endpoint)
     {
+        echo '<script type="text/javascript">console.log("Initiating resource owner information request.")</script>';
         $ch = curl_init($resource_endpoint);
         $authorization = "Authorization: Bearer ".$access_token;
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -150,7 +151,7 @@ EOD;
         } else {
             exit('Invalid response received from OAuth Provider. Contact your administrator for more details.');
         }
-
+        echo '<script type="text/javascript">console.log("Resource owner email received and returned.")</script>';
         return $email;
     }
 
