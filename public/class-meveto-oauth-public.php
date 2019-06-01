@@ -123,7 +123,7 @@ class Meveto_OAuth_Public
         $handler = new Meveto_OAuth_Handler();
         $accessToken = $handler->get_access_token(get_option('meveto_oauth_token_url'), 'authorization_code',
             get_option('meveto_oauth_client_id'), get_option('meveto_oauth_client_secret'), $_GET['code'], $redirect_url);
-        $email = $handler->get_resource_owner($accessToken,"https://api.meveto.com/user/briefinfo");
+        $email = $handler->get_resource_owner($accessToken,"https://auth.meveto.com/meveto-auth/user/briefinfo");
         $this->login_user($email);
     }
 
