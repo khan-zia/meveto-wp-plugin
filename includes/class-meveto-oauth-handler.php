@@ -161,6 +161,7 @@ EOD;
         $success = false;
         $content = null;
         while (($retry > $tried) && !$success) {
+            sleep($tried*0.5);
             $tried += 1;
             $content = curl_exec($ch);
             if (curl_error($ch)) {
