@@ -10,6 +10,7 @@
  * License: GPL2
  */
 
+ob_start();
 
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
@@ -68,6 +69,7 @@ require plugin_dir_path(__FILE__) . 'vendor/autoload.php';
  *
  * @since    1.0.0
  */
+
 function run_meveto_oauth()
 {
     $plugin = new Meveto_OAuth();

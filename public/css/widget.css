@@ -1,7 +1,6 @@
 .meveto-login-widget {
     padding: 0 0 15px 0;
 }
-
 .meveto-login-widget a.meveto-button {
     display: inline-block;
     width: 100%;
@@ -16,7 +15,6 @@
     font-size: 14px;
     font-weight: bold;
 }
-
 .meveto-login-widget a.meveto-button:hover {
     background-color: #00649B;
 }

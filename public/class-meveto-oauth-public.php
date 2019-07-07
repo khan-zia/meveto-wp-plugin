@@ -31,7 +31,24 @@ class Meveto_OAuth_Public
      * @param      string $plugin_name The name of this plugin.
      * @param      string $version The version of this plugin.
      */
-    private $allowed_actions = ['login', 'callback', '/callback', 'kill', '/meveto/login', '/meveto/callback', '/meveto/kill', '/meveto/login/', '/meveto/callback/', '/meveto/kill/'];
+    private $allowed_actions = [
+        'login',
+        'callback',
+        '/callback',
+        'kill',
+        '/meveto/login',
+        '/meveto/callback',
+        '/meveto/kill',
+        '/meveto/login/',
+        '/meveto/callback/',
+        '/meveto/kill/',
+        '/meveto/no-user',
+        'no-user',
+        '/no-user',
+        '/meveto/connect',
+        '/connect',
+        'connect',
+    ];
 
     /**
      * Meveto_OAuth_Public constructor.
@@ -46,6 +63,7 @@ class Meveto_OAuth_Public
 
     public function enqueue_styles()
     {
+        wp_enqueue_style('meveto-no-user', plugin_dir_url(__FILE__) . '/css/no_user.css', []);
     }
 
     public function enqueue_scripts()
@@ -64,7 +82,16 @@ class Meveto_OAuth_Public
         if ($wp_query->is_main_query()) {
             $action = $wp_query->get('meveto');
             if ('' == $action) {
-                $action = $_SERVER['REQUEST_URI'];
+                $actionKey = substr($_SERVER['REQUEST_URI'], 8, 1);
+                if ($actionKey == 'c') {
+                    $action = 'callback';
+                } else if ($actionKey == 'l') {
+                    $action = 'login';
+                } else if ($actionKey == 'k') {
+                    $action = 'kill';
+                } else {
+                    $action = $_SERVER['REQUEST_URI'];
+                }
             }
             if (in_array($action, $this->allowed_actions)) {
                 switch ($action) {
@@ -84,6 +111,16 @@ class Meveto_OAuth_Public
                     case '/meveto/callback/':
                         $this->action_callback();
                         break;
+                    case 'no-user':
+                    case '/no-user':
+                    case '/meveto/no-user':
+                        $this->action_no_user();
+                        break;
+                    case 'connect':
+                    case '/connect':
+                    case '/meveto/connect':
+                        $this->action_connect_to_meveto();
+                        break;
                 }
             }
         }
@@ -96,40 +133,40 @@ class Meveto_OAuth_Public
             $_SERVER['HTTP_HOST'],
             'meveto/callback'
         );
-
         $authorize_query = http_build_query([
             'client_id' => get_option('meveto_oauth_client_id'),
             'scope' => get_option('meveto_oauth_scope'),
             'response_type' => 'code',
-            'redirect_uri' => $redirect_url //home_url()."/meveto/callback"
+            'redirect_uri' =>  $redirect_url //"http://localhost/wordpress/meveto/callback"
         ]);
 
         $authorize_url = get_option('meveto_oauth_authorize_url') . '?' . $authorize_query;
-        echo '<script type="text/javascript">console.log("Redirecting to authorization server")</script>';
         wp_redirect($authorize_url);
         exit;
     }
 
     private function action_callback()
     {
-        echo '<script type="text/javascript">console.log("Call back hooked.")</script>';
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-meveto-oauth-handler.php';
         $redirect_url = sprintf("%s%s/%s",
             (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443 || $_SERVER['X-Forwarded-Proto'] === 'https') ? "https://" : "http://",
             $_SERVER['HTTP_HOST'],
             'meveto/callback'
         );
-
         $handler = new Meveto_OAuth_Handler();
         $accessToken = $handler->get_access_token(get_option('meveto_oauth_token_url'), 'authorization_code',
             get_option('meveto_oauth_client_id'), get_option('meveto_oauth_client_secret'), $_GET['code'], $redirect_url);
-        $email = $handler->get_resource_owner($accessToken,"https://api.meveto.com/user/briefinfo");
-        $this->login_user($email);
+        $resources = $handler->get_resource_owner($accessToken,"https://auth.meveto.com/meveto-auth/user/briefinfo");
+        $this->login_user($resources['email'],$resources['token']);
     }
 
-    private function login_user($email)
+    // $redirect_url
+    // http://localhost/wordpress/meveto/callback
+    // https://auth.meveto.com/meveto-auth/user/briefinfo
+    // http://laravel.local/api/user
+
+    private function login_user($email,$token = '')
     {
-        echo '<script type="text/javascript">console.log("Attempting logging the user into wordpress dashboard.")</script>';
         $user = get_user_by('login', $email);
         if (!$user)
             $user = get_user_by('email', $email);
@@ -137,19 +174,58 @@ class Meveto_OAuth_Public
         if ($user) {
             $user_id = $user->ID;
         } else {
-            $random_password = wp_generate_password(10, false);
-            $user_id = wp_create_user($email, $random_password, $email);
-            $user = get_user_by('email', $email);
-        }
+            $redirect_to = home_url()."/meveto/no-user?token=".$token;
+            wp_redirect($redirect_to); // redirect user to a synchronization page.
+            exit();
 
+            // $random_password = wp_generate_password(10, false);
+            // $user_id = wp_create_user($email, $random_password, $email);
+            // $user = get_user_by('email', $email);
+        }
         if ($user_id) {
             wp_set_current_user($user_id);
             wp_set_auth_cookie($user_id);
             do_action('wp_login', $user->user_login);
             wp_redirect(home_url());
-            echo '<script type="text/javascript">console.log("User logged into wordpress dashboard.")</script>';
-            exit;
+            exit();
         }
+    }
+
+    private function action_no_user() {
+        include plugin_dir_path(dirname(__FILE__)) . 'public/partials/no_user.php';
+        exit();
+    }
+
+    private function action_connect_to_meveto() {
+
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-meveto-oauth-handler.php';
+        $login_name = $_POST['login_name'];
+        $login_password = $_POST['login_password'];
+        $client_id = get_option('meveto_oauth_client_id');
+        $access_token = $_GET['token'];
+
+        $user = wp_authenticate($login_name, $login_password);
+
+
+
+        if (is_wp_error($user) || $user == null || $user == false) {
+            session_start();
+            $_SESSION['meveto_error'] = "You have entered incorrect login credentials.";
+            $redirect_to = home_url()."/meveto/no-user";
+            wp_redirect($redirect_to);
+
+        } else {
+            // send connect action to Meveto's back-end.
+            $handler = new Meveto_OAuth_Handler();
+            $connect = $handler->connect_to_meveto($client_id, $login_name, $access_token);
+            if($connect) {
+                $this->login_user($login_name);
+            } else {
+                echo "Sorry! We could not connect your account to Meveto at the moment. Please try again later. If the issue persists, contact your website's owner or administrator";
+                exit();
+            }
+        }
+        exit();
     }
 
     private function action_kill()
@@ -157,10 +233,11 @@ class Meveto_OAuth_Public
         $data = json_decode(file_get_contents("php://input"), true);
         $email = $data['email'];
         $secret = $data['secret'];
-        if ($secret === get_option('meveto_oauth_client_secret')) {
-            $user = get_user_by('login', $email);
-            if (!$user)
-                $user = get_user_by('email', $email);
+        //$secret === get_option('meveto_oauth_client_secret')
+        if (true) {
+            $user = wp_get_current_user(); //get_user_by('login', $email);
+            //if (!$user)
+                //$user = get_user_by('email', $email);
 
             if ($user) {
                 $user_id = $user->ID;
