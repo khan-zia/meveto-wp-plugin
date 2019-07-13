@@ -153,11 +153,21 @@ class Meveto_OAuth_Public
             $_SERVER['HTTP_HOST'],
             'meveto/callback'
         );
-        $handler = new Meveto_OAuth_Handler();
-        $accessToken = $handler->get_access_token(get_option('meveto_oauth_token_url'), 'authorization_code',
-            get_option('meveto_oauth_client_id'), get_option('meveto_oauth_client_secret'), $_GET['code'], $redirect_url);
-        $resources = $handler->get_resource_owner($accessToken,"https://auth.meveto.com/meveto-auth/user/briefinfo");
-        $this->login_user($resources['email'],$resources['token']);
+        // check whether authorization code was returned by the backend or not.
+        if($_GET['code']) {
+            $handler = new Meveto_OAuth_Handler();
+            $accessToken = $handler->get_access_token(get_option('meveto_oauth_token_url'), 'authorization_code',
+                get_option('meveto_oauth_client_id'), get_option('meveto_oauth_client_secret'), $_GET['code'], $redirect_url);
+            $resources = $handler->get_resource_owner($accessToken,"https://auth.meveto.com/meveto-auth/user/briefinfo");
+            $this->login_user($resources['email'],$resources['token']);
+        } else {
+            // Authorization code was not returned.
+            echo "We are sorry! Meveto could not authenticate your credentials. Meveto server responded with the following error/errors.";
+            echo "<br/>";
+            echo ($_GET['error']) ? $_GET['error'] : '';
+            echo "<br/>";
+            echo ($_GET['error_description']) ? $_GET['error_description'] : '';
+        }
     }
 
     // $redirect_url

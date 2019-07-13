@@ -128,7 +128,7 @@ class Meveto_OAuth_Handler
         } else if (isset($content["error"])) {
             exit($content["error"]);
         } else if (isset($content["success"])) {
-            $success = $content["success"];
+            $success = $content[0]["success"];
         } else {
             exit('Invalid response received from OAuth Provider. Contact your administrator for more details.');
         }
