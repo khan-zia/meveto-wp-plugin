@@ -12,7 +12,8 @@
 		</p>
 		<div class="container">
 			<?php
-			if(isset($_SESSION['meveto_error'])) {
+                error_log("\n no_user:".$_GET['token']."\n The above is JWT token on /no_user.",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
+	            if(isset($_SESSION['meveto_error'])) {
 				?>
 					<div class="meveto-error">
 						<?php echo $_SESSION['error']; ?>
