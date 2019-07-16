@@ -3,6 +3,7 @@
 class Meveto_OAuth_Handler
 {
     public $retry = 3;
+    public $log_file = plugin_dir_path(dirname(__FILE__)) . 'logs/error_log.txt';
 
     /**
      * @param $token_endpoint
@@ -90,7 +91,7 @@ class Meveto_OAuth_Handler
         } else {
             exit('Invalid response received from OAuth Provider. Contact your administrator for more details.');
         }
-        return ['token' => $access_token, 'email' => $email];
+        return $email;
     }
 
     public function connect_to_meveto($client_id,$login_name,$access_token)
@@ -120,16 +121,24 @@ class Meveto_OAuth_Handler
         $content = json_decode($content, true);
 
         if (!is_array($content)) {
+            error_log("\n connect_to_meveto() CURL response returned invalid $content. (Expected array).",3,$this->log_file);
+            error_log("\n ".var_dump($content), 3, $this->log_file);
             echo "<br>Invalid response received from OAuth Provider. Contact your administrator for more details.";
             exit();
         }
         if (isset($content["error_description"])) {
+            error_log("\n error_description on in connect_to_meveto() CURL response", 3, $this->log_file);
+            error_log("\n ".$content["error_description"], 3, $this->log_file);
             exit($content["error_description"]);
         } else if (isset($content["error"])) {
+            error_log("\n error on in connect_to_meveto() CURL response", 3, $this->log_file);
+            error_log("\n ".$content["error"], 3, $this->log_file);
             exit($content["error"]);
         } else if (isset($content[0]["success"])) {
             $success = $content[0]["success"];
         } else {
+            error_log("\n Unknown/Invlid response from connect_to_meveto() CURL response.", 3, $this->log_file);
+            error_log("\n ".var_dump($content), 3, $this->log_file);
             exit('Invalid response received from OAuth Provider. Contact your administrator for more details.');
         }
         return $success;
