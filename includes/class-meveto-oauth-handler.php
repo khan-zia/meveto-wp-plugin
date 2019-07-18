@@ -2,12 +2,8 @@
 
 class Meveto_OAuth_Handler
 {
-<<<<<<< HEAD
     public $retry = 3;
     public $log_file = '../logs/error_log.txt';
-=======
-    public $retry = 2;
->>>>>>> 609ecdc6855c652677cbb27898fa93b28915a3d5
 
     /**
      * @param $token_endpoint
@@ -36,15 +32,14 @@ class Meveto_OAuth_Handler
         curl_setopt($ch, CURLOPT_POSTFIELDS, 'redirect_uri=' . urlencode($redirect_url) . '&grant_type=' . $grant_type . '&client_id=' . $client_id . '&client_secret=' . $client_secret . '&code=' . $code);
 
         $content = $this->call_curl($ch, $this->retry);
-		error_log("\n get_access_token() CURL response: $content",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
+
+        error_log("\n Raw response of the get_access_token() \n",3,$this->log_file);
+        error_log(var_dump($content),3,$this->log_file);
 
         if (curl_error($ch)) {
             exit(curl_error($ch));
         }
         $content = json_decode($content, true);
-
-        error_log("\n Raw response of the get_access_token() \n",3,$this->log_file);
-        error_log(var_dump($content),3,$this->log_file);
 
         if (!is_array($content)) {
             echo "<br>Invalid response received while expecting access token.";
@@ -81,7 +76,6 @@ class Meveto_OAuth_Handler
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , $authorization ));
 
         $content = $this->call_curl($ch, $this->retry);
-		error_log("\n get_resource_owner() CURL response: $content",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
 
         error_log("\n Raw response of the get_resource_owner() \n",3,$this->log_file);
         error_log(var_dump($content),3,$this->log_file);
@@ -128,13 +122,9 @@ class Meveto_OAuth_Handler
 
         $content = $this->call_curl($ch, $this->retry);
 
-<<<<<<< HEAD
         error_log("\n Raw response of the connect_to_meveto() \n",3,$this->log_file);
         error_log(var_dump($content),3,$this->log_file);
 
-=======
-		error_log("\n connect_to_meveto() CURL response: $content",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
->>>>>>> 609ecdc6855c652677cbb27898fa93b28915a3d5
         if (curl_error($ch)) {
             exit(curl_error($ch));
         }

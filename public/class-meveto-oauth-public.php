@@ -8,11 +8,8 @@
  */
 class Meveto_OAuth_Public
 {
-<<<<<<< HEAD
     private $log_file = '../logs/error_log.txt';
 
-=======
->>>>>>> 609ecdc6855c652677cbb27898fa93b28915a3d5
     /**
      * The ID of this plugin.
      *
@@ -166,7 +163,7 @@ class Meveto_OAuth_Public
             $login_name = $handler->get_resource_owner($accessToken,"https://auth.meveto.com/meveto-auth/user/briefinfo");
             $this->login_user($login_name, $accessToken);
         } else {
-            error_log("\n Authorization code not received",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
+            error_log("\n Authorization code not received",3, $this->log_file);
             // Authorization code was not returned.
             echo "We are sorry! Meveto could not authenticate your credentials. Meveto server responded with the following error/errors.";
             echo "<br/>";
@@ -190,10 +187,10 @@ class Meveto_OAuth_Public
         if ($user) {
             $user_id = $user->ID;
         } else {
-            error_log("\n login_user:".$email." user was not found on the WP. Connect to Meveto initiated.",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
-            error_log("\n login_user:".$token."\n The above is authentication token.",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
+            error_log("\n login_user:".$email." user was not found on the WP. Connect to Meveto initiated.",3, $this->log_file);
+            error_log("\n login_user:".$token."\n The above is authentication token.",3, $this->log_file);
             $redirect_to = home_url()."/meveto/no-user?token=".$token;
-            error_log("\n login_user: redirecting: ".$redirect_to,3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
+            error_log("\n login_user: redirecting: ".$redirect_to,3, $this->log_file);
             wp_redirect($redirect_to); // redirect user to a synchronization page.
             exit();
 
