@@ -3,7 +3,7 @@
 class Meveto_OAuth_Handler
 {
     public $retry = 3;
-    public $log_file = plugin_dir_path(dirname(__FILE__)) . 'logs/error_log.txt';
+    public $log_file = '../logs/error_log.txt';
 
     /**
      * @param $token_endpoint
@@ -37,6 +37,9 @@ class Meveto_OAuth_Handler
             exit(curl_error($ch));
         }
         $content = json_decode($content, true);
+
+        error_log("\n Raw response of the get_access_token() \n",3,$this->log_file);
+        error_log(var_dump($content),3,$this->log_file);
 
         if (!is_array($content)) {
             echo "<br>Invalid response received while expecting access token.";
@@ -72,6 +75,9 @@ class Meveto_OAuth_Handler
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , $authorization ));
 
         $content = $this->call_curl($ch, $this->retry);
+
+        error_log("\n Raw response of the get_resource_owner() \n",3,$this->log_file);
+        error_log(var_dump($content),3,$this->log_file);
 
         if (curl_error($ch)) {
             exit(curl_error($ch));
@@ -113,6 +119,9 @@ class Meveto_OAuth_Handler
         curl_setopt($ch, CURLOPT_POSTFIELDS, 'client_id=' . $client_id . '&login_name=' . $login_name);
 
         $content = $this->call_curl($ch, $this->retry);
+
+        error_log("\n Raw response of the connect_to_meveto() \n",3,$this->log_file);
+        error_log(var_dump($content),3,$this->log_file);
 
         if (curl_error($ch)) {
             exit(curl_error($ch));

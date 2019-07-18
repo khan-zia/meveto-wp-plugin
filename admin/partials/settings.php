@@ -5,7 +5,7 @@
         if(!empty(get_option('meveto_oauth_scope'))) {
             $scope = get_option('meveto_oauth_scope');
         } else {
-            $scope = "";
+            $scope = "openid";
         }
         if(!empty(get_option('meveto_oauth_authorize_url'))) {
             $auth_url = get_option('meveto_oauth_authorize_url');

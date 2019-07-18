@@ -8,7 +8,8 @@
  */
 class Meveto_OAuth_Public
 {
-    public $log_file = plugin_dir_path(dirname(__FILE__)) . 'logs/error_log.txt';
+    private $log_file = '../logs/error_log.txt';
+
     /**
      * The ID of this plugin.
      *
@@ -231,7 +232,8 @@ class Meveto_OAuth_Public
         } else {
             // send connect action to Meveto's back-end.
             $handler = new Meveto_OAuth_Handler();
-            $connect = $handler->connect_to_meveto($client_id, $login_name, $access_token);
+            // Send user ID instead of login name this is because login names can be changed.
+            $connect = $handler->connect_to_meveto($client_id, $user->ID, $access_token);
             if($connect) {
                 $this->login_user($login_name);
             } else {
