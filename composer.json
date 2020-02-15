@@ -1,7 +1,15 @@
 {
+    "name": "Meveto WordPress Plugin",
+    "description": "Meveto Plugin for the integration of WordPress based websites.",
+    "authors": [
+        {
+            "name": "Zia U Rehman Khan",
+            "email": "zmajrohi323@gmail.com",
+            "homepage": "https://meveto.com",
+            "role": "CTO"
+        }
+    ],
     "require": {
-        "web-token/jwt-checker": "1.3.7",
-        "web-token/jwt-core": "1.3.7",
-        "web-token/jwt-key-mgmt": "1.3.7"
+        "pusher/pusher-php-server": "^4.1"
     }
 }
