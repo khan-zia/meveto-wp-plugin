@@ -115,7 +115,6 @@ class Meveto_OAuth
     private function define_admin_hooks()
     {
         $plugin_admin = new Meveto_OAuth_Admin($this->get_plugin_name(), $this->get_version());
-
         $this->loader->add_action('admin_init', $plugin_admin, 'enqueue_styles');
         $this->loader->add_action('admin_init', $plugin_admin, 'enqueue_scripts');
         $this->loader->add_action('admin_menu', $plugin_admin, 'extend_menu');
@@ -134,9 +133,11 @@ class Meveto_OAuth
         $plugin_public = new Meveto_OAuth_Public($this->get_plugin_name(), $this->get_version());
 
         $this->loader->add_action('init', $plugin_public, 'add_endpoints');
+        $this->loader->add_action('wp', $plugin_public, 'process_meveto_auth');
+        $this->loader->add_action('wp_login', $plugin_public, 'process_meveto_auth', 10, 2);
         $this->loader->add_action('wp', $plugin_public, 'process_meveto_login');
-        $this->loader->add_action('public_init', $plugin_admin, 'enqueue_styles');
-        $this->loader->add_action('public_init', $plugin_admin, 'enqueue_scripts');
+        $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
+        $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
     }
 
     /**

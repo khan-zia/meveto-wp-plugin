@@ -6,10 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Jose\\Component\\KeyManagement\\' => array($vendorDir . '/web-token/jwt-key-mgmt'),
-    'Jose\\Component\\Core\\Util\\Ecc\\' => array($vendorDir . '/web-token/jwt-util-ecc'),
-    'Jose\\Component\\Core\\' => array($vendorDir . '/web-token/jwt-core'),
-    'Jose\\Component\\Checker\\' => array($vendorDir . '/web-token/jwt-checker'),
-    'FG\\' => array($vendorDir . '/fgrosse/phpasn1/lib'),
-    'Base64Url\\' => array($vendorDir . '/spomky-labs/base64url/src'),
+    'Pusher\\' => array($vendorDir . '/pusher/pusher-php-server/src'),
+    'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
 );

@@ -11,47 +11,21 @@ class ComposerStaticInitff22fcbe97962b8b6181eb6d621e7ef5
     );
 
     public static $prefixLengthsPsr4 = array (
-        'J' => 
+        'P' => 
         array (
-            'Jose\\Component\\KeyManagement\\' => 29,
-            'Jose\\Component\\Core\\Util\\Ecc\\' => 29,
-            'Jose\\Component\\Core\\' => 20,
-            'Jose\\Component\\Checker\\' => 23,
-        ),
-        'F' => 
-        array (
-            'FG\\' => 3,
-        ),
-        'B' => 
-        array (
-            'Base64Url\\' => 10,
+            'Pusher\\' => 7,
+            'Psr\\Log\\' => 8,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Jose\\Component\\KeyManagement\\' => 
+        'Pusher\\' => 
         array (
-            0 => __DIR__ . '/..' . '/web-token/jwt-key-mgmt',
+            0 => __DIR__ . '/..' . '/pusher/pusher-php-server/src',
         ),
-        'Jose\\Component\\Core\\Util\\Ecc\\' => 
+        'Psr\\Log\\' => 
         array (
-            0 => __DIR__ . '/..' . '/web-token/jwt-util-ecc',
-        ),
-        'Jose\\Component\\Core\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/web-token/jwt-core',
-        ),
-        'Jose\\Component\\Checker\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/web-token/jwt-checker',
-        ),
-        'FG\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/fgrosse/phpasn1/lib',
-        ),
-        'Base64Url\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/spomky-labs/base64url/src',
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
         ),
     );
 

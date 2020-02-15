@@ -3,7 +3,6 @@
 class Meveto_OAuth_Handler
 {
     public $retry = 3;
-    public $log_file = '../logs/error_log.txt';
 
     /**
      * @param $token_endpoint
@@ -28,19 +27,12 @@ class Meveto_OAuth_Handler
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Accept: application/json'
         ]);
-
         curl_setopt($ch, CURLOPT_POSTFIELDS, 'redirect_uri=' . urlencode($redirect_url) . '&grant_type=' . $grant_type . '&client_id=' . $client_id . '&client_secret=' . $client_secret . '&code=' . $code);
-
         $content = $this->call_curl($ch, $this->retry);
-
-        error_log("\n Raw response of the get_access_token() \n",3,$this->log_file);
-        error_log(var_dump($content),3,$this->log_file);
-
         if (curl_error($ch)) {
             exit(curl_error($ch));
         }
         $content = json_decode($content, true);
-
         if (!is_array($content)) {
             echo "<br>Invalid response received while expecting access token.";
             exit();
@@ -54,7 +46,6 @@ class Meveto_OAuth_Handler
         } else {
             exit('Invalid response received from OAuth Provider. Contact your administrator for more details.');
         }
-        //echo '<script type="text/javascript">console.log("Access token received and returned.")</script>';
         return $access_token;
     }
 
@@ -62,9 +53,9 @@ class Meveto_OAuth_Handler
      * @param $access_token
      * @return mixed
      */
-    function get_resource_owner($access_token,$resource_endpoint)
+    public function get_resource_owner($access_token,$resource_endpoint)
     {
-		error_log("\n get_resource_owner() CURL JWT token: $access_token",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
+		//error_log("\n get_resource_owner() CURL JWT token: $access_token",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
         $ch = curl_init($resource_endpoint);
         $authorization = "Authorization: Bearer ".$access_token;
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -73,17 +64,11 @@ class Meveto_OAuth_Handler
         curl_setopt($ch, CURLOPT_AUTOREFERER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , $authorization ));
-
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json' , $authorization ));
         $content = $this->call_curl($ch, $this->retry);
-
-        error_log("\n Raw response of the get_resource_owner() \n",3,$this->log_file);
-        error_log(var_dump($content),3,$this->log_file);
-
         if (curl_error($ch)) {
             exit(curl_error($ch));
         }
-
         if (!is_array(json_decode($content, true))) {
             echo "<br>Invalid response received while expecting resource owner information.";
             exit();
@@ -93,66 +78,50 @@ class Meveto_OAuth_Handler
             exit($content["error_description"]);
         } else if (isset($content["error"])) {
             exit($content["error"]);
-        } else if (isset($content["email"])) {
-            $email = $content["email"];
+        } else if (isset($content["message"])) {
+            exit($content["message"]);
+        } else if (isset($content["payload"])) {
+            $user = $content["payload"]['user'];
         } else {
-            exit('Invalid response received from OAuth Provider. Contact your administrator for more details.');
+            exit('Invalid response received from Meveto while trying to retrieve the logged in user. Contact your administrator for more details.');
         }
-        return $email;
+        return $user;
     }
 
-    public function connect_to_meveto($client_id,$login_name,$access_token)
+    /**
+     * Get the user that is associated with the current webhook event
+     * 
+     * @param $user_token
+     * @param $resource_endpoint
+     * @return mixed
+     */
+    public function getTokenUser($user_token, $resource_endpoint)
     {
-		error_log("\n connect_to_meveto() CURL JWT token: access_token",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
-        $ch = curl_init("https://auth.meveto.com/meveto-auth/connect_account");
-        $authorization = "Authorization: Bearer ".$access_token;
+        //error_log("\n\n logout user call initiated for token = \"{$user_token}\"",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
+        $ch = curl_init($resource_endpoint.'?token='.$user_token);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_ENCODING, "");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_AUTOREFERER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Accept: application/json'
-        ]);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , $authorization ));
-
-        curl_setopt($ch, CURLOPT_POSTFIELDS, 'client_id=' . $client_id . '&login_name=' . $login_name);
-
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
         $content = $this->call_curl($ch, $this->retry);
-
-        error_log("\n Raw response of the connect_to_meveto() \n",3,$this->log_file);
-        error_log(var_dump($content),3,$this->log_file);
-
         if (curl_error($ch)) {
             exit(curl_error($ch));
         }
-
         $content = json_decode($content, true);
-
-        if (!is_array($content)) {
-            error_log("\n connect_to_meveto() CURL response returned invalid $content. (Expected array).",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
-            error_log("\n ".var_dump($content), 3, plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
-            echo "<br>Invalid response received from OAuth Provider. Contact your administrator for more details.";
-            exit();
-        }
-        if (isset($content["error_description"])) {
-            error_log("\n error_description on in connect_to_meveto() CURL response", 3, plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
-            error_log("\n ".$content["error_description"], 3, plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
-            exit($content["error_description"]);
-        } else if (isset($content["error"])) {
-            error_log("\n error on in connect_to_meveto() CURL response", 3, plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
-            error_log("\n ".$content["error"], 3, plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
-            exit($content["error"]);
-        } else if (isset($content[0]["success"])) {
-            $success = $content[0]["success"];
+        if ($content["status"] == 'Token_User_Retrieved') {
+            // error_log("\n\n Status success received from the server",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
+            $user = $content['payload']['user'];
+            // error_log("\n\n The logout user is = \"{$user}\"",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
         } else {
-            error_log("\n Unknown/Invlid response from connect_to_meveto() CURL response.", 3, plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
-            error_log("\n ".var_dump($content), 3, plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
-            exit('Invalid response received from OAuth Provider. Contact your administrator for more details.');
+            // There was an error
+            $user = null;
+            //error_log("\n\n Logout user from the server could not be retrieved.",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
         }
-        return $success;
+        
+        return $user;
     }
 
     private function call_curl($ch, $retry)

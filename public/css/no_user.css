@@ -1,4 +1,4 @@
-body {
+body.meveto-body {
 	margin: 0;
 	height: 100vh !important;
 	width: 100vw !important;
@@ -13,7 +13,7 @@ div.meveto-form-wrapper {
 	flex-direction: column;
 	padding: 2rem;
 }
-	div.container {
+	div.meveto-container {
 	    padding: 1.5rem;
 	    margin: 0 auto;
 	    border-radius: 5px;
@@ -27,26 +27,26 @@ div.meveto-form-wrapper {
 		color: red;
 		margin-bottom: 1rem;
 	}
-	p.information {
+	p.meveto-information {
 	    font-size: 20px;
 	    padding: 2rem;
 	    line-height: 20px;
 	}
-	div.form-element {
+	div.meveto-form-element {
 		display: flex;
 		flex-direction: column;
 		margin: 1rem 0;
 	}
-		div.form-element label {
+		div.meveto-form-element label {
 			margin-bottom: 0.5rem;
 		}
-		div.form-element input {
+		div.meveto-form-element input {
 			padding: 0.5rem;
 			font-size: 1rem;
 			border: 1px solid #5e5e5e;
 			outline: none;
 		}
-		div.form-element input:focus, div.form-element input:active {
+		div.meveto-form-element input:focus, div.meveto-form-element input:active {
 			outline: none;
 		}
 		.meveto-button {
