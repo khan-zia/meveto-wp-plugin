@@ -13,7 +13,7 @@ if(data.userId && data.key)
         Toastify({
             text: "You have been logged out from this website using your Meveto dashboard.",
             duration: 3000,
-            destination: "https://meveto.com",
+            destination: "https://dashboard.meveto.com",
             newWindow: true,
             close: false,
             gravity: "top",

@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Created by IntelliJ IDEA.
- * User: gpapkala
- * Date: 28.11.2017
- * Time: 15:20
+ * Created by VSCODE
+ * User: Zia Khan
+ * Date: April 02, 2020
+ * Time: 18:30
  */
 class Meveto_OAuth_Admin
 {
@@ -32,7 +32,7 @@ class Meveto_OAuth_Admin
      * @access    private
      * @var    string $option_name Option name of this plugin
      */
-    private $option_name = 'meveto_oauth';
+    private $option_name = 'meveto';
 
     /**
      * Initialize the class and set its properties.
@@ -77,37 +77,41 @@ class Meveto_OAuth_Admin
         $scope = stripslashes(sanitize_text_field($_POST['meveto_oauth_scope']));
         $authorize_url = esc_url_raw($_POST['meveto_oauth_authorize_url']);
         $token_url = esc_url_raw($_POST['meveto_oauth_token_url']);
+        $allow_passwords = stripslashes(sanitize_text_field($_POST['meveto_allow_passwords']));
 
         $pusher_app = stripslashes(sanitize_text_field($_POST['meveto_pusher_app_id']));
         $pusher_key = stripslashes(sanitize_text_field($_POST['meveto_pusher_key']));
         $pusher_secret = stripslashes(sanitize_text_field($_POST['meveto_pusher_secret']));
         $pusher_cluster = stripslashes(sanitize_text_field($_POST['meveto_pusher_cluster']));
 
-        update_option($this->option_name . '_client_id', $client_id);
-        update_option($this->option_name . '_client_secret', $client_secret);
-        update_option($this->option_name . '_scope', $scope);
-        update_option($this->option_name . '_authorize_url', $authorize_url);
-        update_option($this->option_name . '_token_url', $token_url);
+        update_option($this->option_name . '_oauth_client_id', $client_id);
+        update_option($this->option_name . '_oauth_client_secret', $client_secret);
+        update_option($this->option_name . '_oauth_scope', $scope);
+        update_option($this->option_name . '_oauth_authorize_url', $authorize_url);
+        update_option($this->option_name . '_oauth_token_url', $token_url);
+        update_option($this->option_name . '_allow_passwords', $allow_passwords);
 
-        update_option('meveto_pusher_app_id', $pusher_app);
-        update_option('meveto_pusher_key', $pusher_key);
-        update_option('meveto_pusher_secret', $pusher_secret);
-        update_option('meveto_pusher_cluster', $pusher_cluster);
+        update_option($this->option_name . '_pusher_app_id', $pusher_app);
+        update_option($this->option_name . '_pusher_key', $pusher_key);
+        update_option($this->option_name . '_pusher_secret', $pusher_secret);
+        update_option($this->option_name . '_pusher_cluster', $pusher_cluster);
     }
 
     public function enqueue_styles()
     {
-        wp_enqueue_style('meveto-admin', plugin_dir_url(__FILE__) . '/css/admin.css', []);
-        wp_register_style( 'toaster', 'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css', []);
-        wp_enqueue_style('toaster');
-        wp_enqueue_style('meveto-main', plugin_dir_url(__DIR__) . 'assets/css/main.css', []);
+        admin_register_style('meveto-main', plugin_dir_url(__DIR__) . 'assets/css/main.css', []);
+        admin_enqueue_style('meveto-main');
+        admin_register_style('meveto-admin', plugin_dir_url(__FILE__) . '/css/admin.css', []);
+        admin_enqueue_style('meveto-admin');
+        admin_register_style( 'meveto-toaster', plugin_dir_url(__DIR__) . 'assets/css/toaster.css', []);
+        admin_enqueue_style('meveto-toaster');
     }
 
     public function enqueue_scripts()
     {
-        wp_register_script( 'pusher', 'https://js.pusher.com/5.0/pusher.min.js', []);
+        wp_register_script( 'pusher', plugin_dir_url(__DIR__) . 'assets/js/pusher.js', []);
         wp_enqueue_script('pusher');
-        wp_register_script( 'toaster', 'https://cdn.jsdelivr.net/npm/toastify-js', []);
+        wp_register_script( 'toaster', plugin_dir_url(__DIR__) . 'assets/js/toaster.js', []);
         wp_enqueue_script('toaster');
         wp_register_script( 'meveto-pusher', plugin_dir_url(__DIR__) . 'assets/js/meveto.pusher.js', []);
         wp_localize_script( 'meveto-pusher', 'data', [

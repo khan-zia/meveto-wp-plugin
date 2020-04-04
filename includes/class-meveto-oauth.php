@@ -138,6 +138,8 @@ class Meveto_OAuth
         $this->loader->add_action('wp', $plugin_public, 'process_meveto_login');
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
+        $this->loader->add_action('login_enqueue_scripts', $plugin_public, 'enqueue_styles');
+        $this->loader->add_action('login_enqueue_scripts', $plugin_public, 'enqueue_scripts');
     }
 
     /**

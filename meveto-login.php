@@ -3,10 +3,10 @@
 /**
  * Plugin Name: Login with Meveto - ( OAuth Client )
  * Plugin URI: https://meveto.com
- * Description: This plugin enables login to your Wordpress site using OAuth through Meveto
+ * Description: This plugin will help you integrate Meveto in your WordPress site to use Meveto's password-less authentication both for you and your users.
  * Version: 1.0.1
- * Author: meveto
- * Author URI: https://meveto.com
+ * Author: Zia U Rehman Khan
+ * Author URI: https://www.linkedin.com/in/zia-u-rehman-khan-14b27b4b/
  * License: GPL2
  */
 

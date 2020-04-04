@@ -39,7 +39,7 @@ class Meveto_OAuth_Widget extends WP_Widget
 
     public function enqueue_styles()
     {
-        wp_enqueue_style('meveto-widget', plugin_dir_url(__FILE__) . '/css/widget.css', []);
+        //wp_enqueue_style('meveto-widget', plugin_dir_url(__FILE__) . '/css/widget.css', []);
     }
 
     public function enqueue_scripts()

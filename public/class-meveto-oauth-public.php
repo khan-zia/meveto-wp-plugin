@@ -51,12 +51,14 @@ class Meveto_OAuth_Public
         'meveto/webhook',
         'meveto/no-user',
         'meveto/connect',
+        'meveto/pusherauth',
 
         '/meveto/login',
         '/meveto/redirect',
         '/meveto/webhook',
         '/meveto/no-user',
         '/meveto/connect',
+        '/meveto/pusherauth',
     ];
 
     /**
@@ -72,27 +74,31 @@ class Meveto_OAuth_Public
 
     public function enqueue_styles()
     {
-        wp_enqueue_style('meveto-no-user', plugin_dir_url(__FILE__) . '/css/no_user.css', []);
-        wp_register_style( 'toaster', 'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css', []);
-        wp_enqueue_style('toaster');
-        wp_enqueue_style('meveto-main', plugin_dir_url(__DIR__) . 'assets/css/main.css', []);
+        wp_register_style('meveto-main', plugin_dir_url(__DIR__) . 'assets/css/main.css', []);
+        wp_enqueue_style('meveto-main');
+        wp_register_style('meveto-button', plugin_dir_url(__DIR__) . 'assets/css/widget.css', []);
+        wp_enqueue_style('meveto-button');
+        wp_register_style( 'meveto-toaster', plugin_dir_url(__DIR__) . 'assets/css/toaster.css', []);
+        wp_enqueue_style('meveto-toaster');
+
+        // wp_register_style('meveto-no-user', plugin_dir_url(__DIR__) . 'assets/css/no_user.css', []);
+        // wp_enqueue_style('meveto-no-user');
     }
 
     public function enqueue_scripts()
     {
-        wp_register_script( 'pusher', 'https://js.pusher.com/5.0/pusher.min.js', []);
-        wp_enqueue_script('pusher');
-        wp_register_script( 'toaster', 'https://cdn.jsdelivr.net/npm/toastify-js', []);
-        wp_enqueue_script('toaster');
-        wp_register_script( 'meveto-pusher', plugin_dir_url(__DIR__) . 'assets/js/meveto.pusher.js', []);
-        wp_localize_script( 'meveto-pusher', 'data', [
+        wp_register_script('meveto-pusher', plugin_dir_url(__DIR__) . 'assets/js/pusher.js', []);
+        wp_enqueue_script('meveto-pusher');
+        wp_register_script('meveto-toaster', plugin_dir_url(__DIR__) . 'assets/js/toaster.js', []);
+        wp_enqueue_script('meveto-toaster');
+        wp_register_script('meveto-pusher', plugin_dir_url(__DIR__) . 'assets/js/meveto.pusher.js', []);
+        wp_localize_script('meveto-pusher', 'data', [
             'userId' => get_current_user_id() ? get_current_user_id() : null,
             'key' => get_option('meveto_pusher_key') ? get_option('meveto_pusher_key') : null,
             'cluster' => get_option('meveto_pusher_cluster') ? get_option('meveto_pusher_cluster') : null,
             'authEndpoint' => home_url('meveto/pusherauth'),
             'homeUrl' => get_home_url(),
         ]);
-        wp_enqueue_script('meveto-pusher');
     }
 
     public function add_endpoints()
@@ -100,41 +106,13 @@ class Meveto_OAuth_Public
         add_rewrite_endpoint('meveto', EP_ROOT);
     }
 
-    public function check_user_login($user_login = null, $user = null)
-    {
-        if($user != null)
-        {
-            // Check if the current user has started using Meveto. If so, then make sure the user logged in using Meveto.
-            global $wpdb;
-            $table = $wpdb->prefix.'meveto_users';
-            $query = "SELECT last_logged_in, last_logged_out FROM `{$wpdb->dbname}`.`{$table}` WHERE `id` = '{$user->ID}'";
-            $meveto_user = $wpdb->get_results($query, ARRAY_A);
-            
-            if($meveto_user != null)
-            {
-                if($meveto_user[0]['last_logged_out'] != null && ($meveto_user[0]['last_logged_in'] > $meveto_user[0]['last_logged_out']))
-                {
-                    // The user is not logged in via Meveto. Log the user out.
-                    wp_logout();
-                    if($showMessage) {
-                        echo "Your account is protected by Meveto. You can not login to your account using your password. Please use Meveto to login to your account.";
-                        echo "<br/> <a href='".home_url().'/meveto/login'."'>Login using Meveto</a>";
-                        exit;
-                    } else {
-                        wp_redirect(home_url());
-                    }
-                }
-            }
-        }
-    }
-
     public function process_meveto_auth($user_login = null, $user = null)
     {
         if($user && $user_login)
         {
-            $showMessage = true;
+            $freshLoginAttempt = true;
         } else {
-            $showMessage = false;
+            $freshLoginAttempt = false;
         }
         // Check if an authenticated user exist
         if($user == null)
@@ -145,6 +123,7 @@ class Meveto_OAuth_Public
         if($user != null)
         {
             // Check if the current user has started using Meveto. If so, then make sure the user is logged in using Meveto.
+            // If the admin has chosen to allow passwords, then skip. Check the option for 'meveto_allow_passwords'
             global $wpdb;
             $table = $wpdb->prefix.'meveto_users';
             $query = "SELECT last_logged_in, last_logged_out FROM `{$wpdb->dbname}`.`{$table}` WHERE `id` = '{$user->ID}'";
@@ -152,15 +131,28 @@ class Meveto_OAuth_Public
             
             if($meveto_user != null)
             {
-                if($meveto_user[0]['last_logged_out'] != null && ($meveto_user[0]['last_logged_out'] > $meveto_user[0]['last_logged_in']))
-                {
-                    // The user is not logged in via Meveto. Log the user out.
-                    wp_logout();
-                    if($showMessage) {
+                if($freshLoginAttempt) {
+                    // The user is not logged in via Meveto. If passwords are not allowed, Log the user out.
+                    if(get_option('meveto_allow_passwords') == 'on')
+                    {
+                        // Since passwords are allowed, then update the last_logged_in time for the current user
+                        $timestamp = time();
+                        $query = "UPDATE `{$wpdb->dbname}`.`{$table}` SET `last_logged_in` = '{$timestamp}' WHERE `{$table}`.`id` = '{$user->ID}'";
+                        $wpdb->query($query);
+
+                    } else {
+                        // Otherwise, do not let the user login using a password.
+                        wp_logout();
                         echo "Your account is protected by Meveto. You can not login to your account using your password. Please use Meveto to login to your account.";
                         echo "<br/> <a href='".home_url().'/meveto/login'."'>Login using Meveto</a>";
                         exit;
-                    } else {
+                    }
+                } else {
+                    if($meveto_user[0]['last_logged_out'] != null && ($meveto_user[0]['last_logged_out'] > $meveto_user[0]['last_logged_in']))
+                    {
+                        // If it's not a fresh login attempt, then the currently logged in user has requested a logout from their Meveto dashboard.
+                        // Make sure to log the user out.
+                        wp_logout();
                         wp_redirect(home_url());
                     }
                 }
@@ -170,8 +162,19 @@ class Meveto_OAuth_Public
 
     public function process_meveto_login()
     {
-        global $wp_query;
-        $action = $wp_query->query_vars['meveto'];
+        global $wp;
+        $action = $wp->request;
+
+        if($action == '' OR $action == null)
+        {
+            global $wp_query;
+            $action = $wp_query->query['pagename'];
+
+            if($action == '' OR $action == null)
+            {
+                $action = $wp_query->query_vars['meveto'];
+            }
+        }
         if (in_array($action, $this->allowed_actions)) {
             switch ($action) {
                 case 'login':
@@ -206,6 +209,8 @@ class Meveto_OAuth_Public
                     break;
                 case 'pusherauth':
                 case '/pusherauth':
+                case 'meveto/pusherauth':
+                case '/meveto/pusherauth':
                     $this->action_auth_pusher();
                     break;
             }
@@ -227,11 +232,11 @@ class Meveto_OAuth_Public
         ];
         if(isset($_GET['client_token']))
         {
-            $query['client_token'] = $_GET['client_token'];
+            $query['client_token'] = stripslashes(sanitize_text_field($_GET['client_token']));
         }
         if(isset($_GET['sharing_token']))
         {
-            $query['sharing_token'] = $_GET['sharing_token'];
+            $query['sharing_token'] = stripslashes(sanitize_text_field($_GET['sharing_token']));
         }
         $authorize_query = http_build_query($query);
 
@@ -248,18 +253,23 @@ class Meveto_OAuth_Public
             $_SERVER['HTTP_HOST'],
             'meveto/redirect'
         );
-        // check whether authorization code was returned by the backend or not.
+        // check whether authorization code was returned by the Meveto OAuth server or not.
+        // This data can be trusted
         if($_GET['code']) {
             $client_id = get_option('meveto_oauth_client_id');
             $handler = new Meveto_OAuth_Handler();
             $accessToken = $handler->get_access_token(get_option('meveto_oauth_token_url'), 'authorization_code', $client_id, get_option('meveto_oauth_client_secret'), $_GET['code'], $redirect_url);
             $mevetoUserId = $handler->get_resource_owner($accessToken,"https://prod.meveto.com/api/client/user?client_id=".$client_id);
 
-        $handler = new Meveto_OAuth_Handler();
-        $accessToken = $handler->get_access_token(get_option('meveto_oauth_token_url'), 'authorization_code',
-            get_option('meveto_oauth_client_id'), get_option('meveto_oauth_client_secret'), $_GET['code'], $redirect_url);
-        $email = $handler->get_resource_owner($accessToken,"https://auth.meveto.com/meveto-auth/user/briefinfo");
-        $this->login_user($email);
+            $this->login_user($mevetoUserId);
+        } else {
+            // Authorization code was not returned.
+            echo "We are sorry! Meveto could not authenticate your credentials. Meveto server responded with the following error/errors.";
+            echo "<br/>";
+            echo ($_GET['error']) ? $_GET['error'] : '';
+            echo "<br/>";
+            echo ($_GET['error_description']) ? $_GET['error_description'] : '';
+        }
     }
 
     private function login_user($mevetoUserId)
@@ -319,9 +329,9 @@ class Meveto_OAuth_Public
     private function action_connect_to_meveto()
     {
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-meveto-oauth-handler.php';
-        $login_name = $_POST['login_name'];
-        $login_password = $_POST['login_password'];
-        $mevetoId = $_GET['meveto_id'];
+        $login_name = stripslashes(sanitize_text_field($_POST['login_name']));
+        $login_password = stripslashes(sanitize_text_field($_POST['login_password']));
+        $mevetoId = stripslashes(sanitize_text_field($_GET['meveto_id']));
 
         $user = wp_authenticate($login_name, $login_password);
 
@@ -346,14 +356,17 @@ class Meveto_OAuth_Public
     {
         if(is_user_logged_in())
         {
+            $channel = stripslashes(sanitize_text_field($_POST['channel_name']));
+            $socket = stripslashes(sanitize_text_field($_POST['socket_id']));
+
             // Make sure the logged in user and the owns the private channel. Extract user ID from the channel name
-            $array = explode('.', $_POST['channel_name']);
+            $array = explode('.', $channel);
             $userID = array_values(array_slice($array, -1))[0];
             if($userID == get_current_user_id())
             {
                 $pusher = $this->instantiatePusher();
                 status_header(200);
-                echo $pusher->socket_auth($_POST['channel_name'], $_POST['socket_id']);
+                echo $pusher->socket_auth($channel, $socket);
             }
         }
         else {
@@ -403,7 +416,7 @@ class Meveto_OAuth_Public
                     echo "";
                     exit();
                 } else {
-                    error_log("\n\n Could not exchange logout token for a user. 403 response sent to Meveto webhook call",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
+                    //error_log("\n\n Could not exchange logout token for a user. 403 response sent to Meveto webhook call",3,plugin_dir_path(dirname(__FILE__)).'logs/error_log.txt');
                     status_header(403);
                     exit();
                 }
