@@ -99,12 +99,12 @@ class Meveto_OAuth_Admin
 
     public function enqueue_styles()
     {
-        admin_register_style('meveto-main', plugin_dir_url(__DIR__) . 'assets/css/main.css', []);
-        admin_enqueue_style('meveto-main');
-        admin_register_style('meveto-admin', plugin_dir_url(__FILE__) . '/css/admin.css', []);
-        admin_enqueue_style('meveto-admin');
-        admin_register_style( 'meveto-toaster', plugin_dir_url(__DIR__) . 'assets/css/toaster.css', []);
-        admin_enqueue_style('meveto-toaster');
+        wp_register_style('meveto-main', plugin_dir_url(__DIR__) . 'assets/css/main.css', []);
+        wp_enqueue_style('meveto-main');
+        wp_register_style('meveto-admin', plugin_dir_url(__FILE__) . '/css/admin.css', []);
+        wp_enqueue_style('meveto-admin');
+        wp_register_style( 'meveto-toaster', plugin_dir_url(__DIR__) . 'assets/css/toaster.css', []);
+        wp_enqueue_style('meveto-toaster');
     }
 
     public function enqueue_scripts()

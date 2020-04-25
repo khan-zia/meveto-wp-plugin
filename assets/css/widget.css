@@ -1,20 +1,23 @@
-.meveto-login-widget {
+div.meveto-login-widget {
     padding: 0 0 15px 0;
 }
-.meveto-login-widget a.meveto-button {
-    display: inline-block;
-    width: 100%;
-    background-color: #0079BB;
-    color: white;
-    text-align: center;
-    padding: 15px 0;
-    -webkit-transition: background-color 500ms linear;
-    -ms-transition: background-color 500ms linear;
-    transition: background-color 500ms linear;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: bold;
+div.meveto-login-widget a.meveto-button {
+    display: inline-block !important;
+    text-decoration: none !important;
+    background-color: #55a4f3 !important;
+    border: 1px solid #55a4f3 !important;
+    padding: 1rem 0 !important;
+    color: white !important;
+    text-align: center !important;
+    font-size: 1rem !important;
+    letter-spacing: 0.04rem !important;
+    font-weight: bold !important;
+    border-radius: 5px !important;
+    text-transform: none !important;
+    width: 100% !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 }
-.meveto-login-widget a.meveto-button:hover {
-    background-color: #00649B;
+div.meveto-login-widget a.meveto-button:hover {
+    background-color: #00649B !important;
+    border: 1px solid #00649B !important;
 }

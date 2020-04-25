@@ -32,20 +32,6 @@ class Meveto_OAuth_Public
      * @param      string $version The version of this plugin.
      */
     private $allowed_actions = [
-        'login',
-        'redirect',
-        'webhook',
-        'no-user',
-        'connect',
-        'pusherauth',
-
-        '/login',
-        '/redirect',
-        '/webhook',
-        '/no-user',
-        '/connect',
-        '/pusherauth',
-
         'meveto/login',
         'meveto/redirect',
         'meveto/webhook',
@@ -81,14 +67,14 @@ class Meveto_OAuth_Public
         wp_register_style( 'meveto-toaster', plugin_dir_url(__DIR__) . 'assets/css/toaster.css', []);
         wp_enqueue_style('meveto-toaster');
 
-        // wp_register_style('meveto-no-user', plugin_dir_url(__DIR__) . 'assets/css/no_user.css', []);
-        // wp_enqueue_style('meveto-no-user');
+        wp_register_style('meveto-no-user', plugin_dir_url(__DIR__) . 'assets/css/no_user.css', []);
+        wp_enqueue_style('meveto-no-user');
     }
 
     public function enqueue_scripts()
     {
-        wp_register_script('meveto-pusher', plugin_dir_url(__DIR__) . 'assets/js/pusher.js', []);
-        wp_enqueue_script('meveto-pusher');
+        wp_register_script('meveto-pusher-service', plugin_dir_url(__DIR__) . 'assets/js/pusher.js', []);
+        wp_enqueue_script('meveto-pusher-service');
         wp_register_script('meveto-toaster', plugin_dir_url(__DIR__) . 'assets/js/toaster.js', []);
         wp_enqueue_script('meveto-toaster');
         wp_register_script('meveto-pusher', plugin_dir_url(__DIR__) . 'assets/js/meveto.pusher.js', []);
@@ -99,6 +85,7 @@ class Meveto_OAuth_Public
             'authEndpoint' => home_url('meveto/pusherauth'),
             'homeUrl' => get_home_url(),
         ]);
+        wp_enqueue_script('meveto-pusher');
     }
 
     public function add_endpoints()
@@ -164,12 +151,12 @@ class Meveto_OAuth_Public
     {
         global $wp;
         $action = $wp->request;
-
+        
         if($action == '' OR $action == null)
         {
             global $wp_query;
             $action = $wp_query->query['pagename'];
-
+            
             if($action == '' OR $action == null)
             {
                 $action = $wp_query->query_vars['meveto'];
@@ -177,38 +164,26 @@ class Meveto_OAuth_Public
         }
         if (in_array($action, $this->allowed_actions)) {
             switch ($action) {
-                case 'login':
-                case '/login':
                 case 'meveto/login':
                 case '/meveto/login':
                     $this->action_login();
                     break;
-                case 'webhook':
-                case '/webhook':
                 case 'meveto/webhook':
                 case '/meveto/webhook':
                     $this->action_process_webhook();
                     break;
-                case 'redirect':
-                case '/redirect':
                 case 'meveto/redirect':
                 case '/meveto/redirect':
                     $this->action_callback();
                     break;
-                case 'no-user':
-                case '/no-user':
                 case 'meveto/no-user':
                 case '/meveto/no-user':
                     $this->action_no_user();
                     break;
-                case 'connect':
-                case '/connect':
                 case 'meveto/connect':
                 case '/meveto/connect':
                     $this->action_connect_to_meveto();
                     break;
-                case 'pusherauth':
-                case '/pusherauth':
                 case 'meveto/pusherauth':
                 case '/meveto/pusherauth':
                     $this->action_auth_pusher();
@@ -306,22 +281,10 @@ class Meveto_OAuth_Public
             wp_redirect($redirect_to); // redirect user to a connect to Meveto page.
             exit();
         }
-
-
-        // $user = get_user_by('login', $mevetoUserId);
-        // if (!$user)
-        //     $user = get_user_by('email', $mevetoUserId);
-		// if (!$user)
-        //     $user = get_user_by('id', $mevetoUserId);
-
-        // if ($user) {
-        //     $user_id = $user->ID;
-        // } else {
-
-        // }
     }
 
     private function action_no_user() {
+        // Load the template for the NO USER virtual page.
         include plugin_dir_path(dirname(__FILE__)) . 'public/partials/no_user.php';
         exit();
     }
@@ -386,12 +349,12 @@ class Meveto_OAuth_Public
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-meveto-oauth-handler.php';
 
         // Switch over type of the event
-        switch($_REQUEST['type'])
+        switch($data['type'])
         {
             case 'User_Logged_Out':
                 // Exchange the token for user information
                 $handler = new Meveto_OAuth_Handler();
-                $user = $handler->getTokenUser($_REQUEST['user_token'], 'https://prod.meveto.com/api/client/user-for-token');
+                $user = $handler->getTokenUser($data['user_token'], 'https://prod.meveto.com/api/client/user-for-token');
                 if($user)
                 {
                     // Find the corresponding local user for the Meveto ID (user)
@@ -424,7 +387,7 @@ class Meveto_OAuth_Public
             case 'Meveto_Protection_Removed':
                 // Exchange the token for user information
                 $handler = new Meveto_OAuth_Handler();
-                $user = $handler->getTokenUser($_REQUEST['user_token'], 'https://prod.meveto.com/api/client/user-for-token');
+                $user = $handler->getTokenUser($data['user_token'], 'https://prod.meveto.com/api/client/user-for-token');
                 if($user)
                 {
                     // Set meveto_id to NULL for the user
@@ -440,14 +403,17 @@ class Meveto_OAuth_Public
                         $table = $wpdb->prefix.'meveto_users';
                         $query = "DELETE FROM `{$wpdb->dbname}`.`{$table}` WHERE `{$table}`.`id` = '{$user['ID']}'";
                         $wpdb->query($query);
-
-                        status_header(200);
-                        echo "";
-                        exit();
                     }
+
+                    // Event if the user could not be found here locally, send a 200 response to Meveto regardless. This is because the User could possibly have not mapped their Meveto
+                    // account to a local user account
+                    status_header(200);
+                    echo "";
+                    exit();
+                } else {
+                    status_header(403);
+                    exit();
                 }
-                status_header(403);
-                exit();
             break;
         }
     }

@@ -6,62 +6,88 @@ body.meveto-body {
 	font-family: Helvetica, Arial;
 	background-color: #f5f5f5;
 }
-div.meveto-form-wrapper {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-direction: column;
-	padding: 2rem;
+div#meveto-form-wrapper {
+	display: flex !important;
+	justify-content: center !important;
+	align-items: center !important;
+	flex-direction: column !important;
+	padding: 3rem !important;
+	background-color: #55a4f3 !important;
+	color: #ffffff !important;
+	border-radius: 5px !important;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 }
-	div.meveto-container {
-	    padding: 1.5rem;
-	    margin: 0 auto;
-	    border-radius: 5px;
-	    box-shadow: 0 0 5px #000;
-	    width: 400px;
-	    max-width: 100%;
-	    background-color: #fff;
+	div#meveto-form-wrapper div.meveto-container {
+	    padding: 2.5rem !important;
+	    margin: 0 auto !important;
+	    border-radius: 5px !important;
+	    width: 700px !important;
+	    max-width: 100% !important;
+		background-color: #ffffff !important;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 	}
-	div.meveto-error {
-		font-family: 1rem;
+	div#meveto-form-wrapper h2.meveto-no-user-header {
+		margin: 0 !important;
+		margin-bottom: 15px !important;
+		font-size: 22px !important;
+		color: #ffffff !important;
+		width: 700px !important;
+		max-width: 100% !important;
+	}
+	div#meveto-form-wrapper p.meveto-para {
+		margin: 0 !important;
+		margin-bottom: 10px !important;
+		font-size: 16px !important;
+		width: 700px !important;
+		max-width: 100% !important;
+	}
+	div.meveto-container div.meveto-error {
+		font-size: 16px;
 		color: red;
 		margin-bottom: 1rem;
 	}
-	p.meveto-information {
-	    font-size: 20px;
-	    padding: 2rem;
-	    line-height: 20px;
+	div.meveto-container div.meveto-form-element {
+		display: flex !important;
+		flex-direction: column !important;
+		margin: 2.5rem 0 !important;
 	}
-	div.meveto-form-element {
-		display: flex;
-		flex-direction: column;
-		margin: 1rem 0;
-	}
-		div.meveto-form-element label {
-			margin-bottom: 0.5rem;
+		div.meveto-container label.meveto-label {
+			margin: 0 !important;
+			margin-bottom: 5px !important;
+			color: #535353 !important;
+			font-size: 1.5rem !important;
+			font-weight: unset  !important;
 		}
-		div.meveto-form-element input {
-			padding: 0.5rem;
-			font-size: 1rem;
-			border: 1px solid #5e5e5e;
+		div.meveto-container div.meveto-form-element input {
+			margin: 0 !important;
+			padding: 1.2rem !important;
+			font-size: 1.4rem !important;
+			border: 1px solid #535353 !important;
+			outline: none !important;
+			border-radius: 5px !important;
+			font-weight: unset  !important;
+		}
+		div.meveto-container div.meveto-form-element input:focus, div.meveto-container div.meveto-form-element input:active {
 			outline: none;
 		}
-		div.meveto-form-element input:focus, div.meveto-form-element input:active {
-			outline: none;
+		div#meveto-form-wrapper div.meveto-container button.meveto-button {
+		    background-color: #55a4f3 !important;
+		    border: 1px solid #55a4f3 !important;
+		    padding: 1.2rem !important;
+		    color: white !important;
+		    text-align: center !important;
+		    font-size: 1.4rem !important;
+			font-weight: bold !important;
+			border-radius: 5px !important;
+			text-transform: none !important;
+			width: 100% !important;
+			max-width: 100% !important;
+			line-height: unset !important;
+			height: unset !important;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 		}
-		.meveto-button {
-		    background-color: #0079BB;
-		    border: 1px solid #0079BB;
-		    padding: 0.5rem 0;
-		    color: white;
-		    text-align: center;
-		    -webkit-transition: background-color 500ms linear;
-		    -ms-transition: background-color 500ms linear;
-		    transition: background-color 500ms linear;
-		    font-size: 1rem;
-		    font-weight: bold;
-		}
-		.meveto-button:hover {
-		    background-color: #00649B;
-		    cursor: pointer;
+		div#meveto-form-wrapper div.meveto-container button.meveto-button:hover {
+		    background-color: #00649B  !important;
+			cursor: pointer  !important;
+			text-decoration: none  !important;
 		}
