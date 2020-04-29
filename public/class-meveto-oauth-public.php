@@ -130,8 +130,8 @@ class Meveto_OAuth_Public
                     } else {
                         // Otherwise, do not let the user login using a password.
                         wp_logout();
-                        echo "Your account is protected by Meveto. You can not login to your account using your password. Please use Meveto to login to your account.";
-                        echo "<br/> <a href='".home_url().'/meveto/login'."'>Login using Meveto</a>";
+                        echo esc_html("Your account is protected by Meveto. You can not login to your account using your password. Please use Meveto to login to your account.");
+                        echo esc_html("<br/> <a href='".home_url().'/meveto/login'."'>Login using Meveto</a>");
                         exit;
                     }
                 } else {
@@ -239,11 +239,11 @@ class Meveto_OAuth_Public
             $this->login_user($mevetoUserId);
         } else {
             // Authorization code was not returned.
-            echo "We are sorry! Meveto could not authenticate your credentials. Meveto server responded with the following error/errors.";
-            echo "<br/>";
-            echo ($_GET['error']) ? $_GET['error'] : '';
-            echo "<br/>";
-            echo ($_GET['error_description']) ? $_GET['error_description'] : '';
+            echo esc_html("We are sorry! Meveto could not authenticate your credentials. Meveto server responded with the following error/errors.");
+            echo esc_html("<br/>");
+            echo esc_html($_GET['error'] ? $_GET['error'] : '');
+            echo esc_html("<br/>");
+            echo esc_html($_GET['error_description'] ? $_GET['error_description'] : '');
         }
     }
 
@@ -329,12 +329,12 @@ class Meveto_OAuth_Public
             {
                 $pusher = $this->instantiatePusher();
                 status_header(200);
-                echo $pusher->socket_auth($channel, $socket);
+                echo esc_html($pusher->socket_auth($channel, $socket));
             }
         }
         else {
             status_header(403);
-            echo "Forbidden";
+            echo esc_html("Forbidden");
         }
         exit();
     }

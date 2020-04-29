@@ -17,7 +17,7 @@
 				unset($_SESSION['meveto_error']);
 			}
 			?>
-		    <form method="post" action="<?php echo home_url().'/meveto/connect?meveto_id='.$_GET['meveto_id']; ?>">
+		    <form method="post" action="<?php echo home_url().'/meveto/connect?meveto_id='.stripslashes(sanitize_text_field($_GET['meveto_id'])); ?>">
 		    	<div class="meveto-form-element">
 		    		<label class="meveto-label" for="login_name">Your login email/username</label>
 		    		<input
