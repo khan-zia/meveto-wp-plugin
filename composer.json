@@ -1,6 +1,6 @@
 {
-    "name": "Meveto WordPress Plugin",
-    "description": "Meveto Plugin for the integration of WordPress based websites.",
+    "name": "meveto/wordpress-plugin",
+    "description": "Meveto OAuth client Plugin for the integration of WordPress based websites.",
     "authors": [
         {
             "name": "Zia U Rehman Khan",

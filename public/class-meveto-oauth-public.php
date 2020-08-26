@@ -329,7 +329,7 @@ class Meveto_OAuth_Public
             {
                 $pusher = $this->instantiatePusher();
                 status_header(200);
-                echo esc_html($pusher->socket_auth($channel, $socket));
+                echo $pusher->socket_auth($channel, $socket);
             }
         }
         else {
